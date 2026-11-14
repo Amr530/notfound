@@ -1,0 +1,83 @@
+# Harmonizer configuration.
+#
+# Every scientific parameter is declared here. Values marked `null` are
+# placeholders: they must be justified and verified in the phase that owns
+# them. Nothing in this file is a scientific conclusion yet.
+
+project:
+  name: "PyroScope"
+  team: "Not Found"
+  event: "NASA Space Apps Cairo 2026"
+
+paths:
+  # Read-only originals. Never written to by any pipeline stage.
+  raw: "dataSets"
+  interim: "data/interim"
+  processed: "data/processed"
+  runs: "data/processed/runs"
+  uploads: "data/interim/uploads"
+  # Exported files are new outputs; imported observations are never modified.
+  exports: "data/processed/exports"
+
+# Slice E: exports.
+exports:
+  # Refuse a single export larger than this, with a structured 413.
+  max_rows: 500000
+
+storage:
+  # Analytical store. Raw CSVs are never modified; they are imported into this
+  # DuckDB file and the original row is preserved in `raw_json`.
+  duckdb_path: "data/processed/pyroscope.duckdb"
+
+api:
+  prefix: "/api/v1"
+  default_limit: 100
+  max_limit: 1000
+
+ingestion:
+  allowed_extensions:
+    - ".csv"
+  # Platform mapping is an ENGINEERING ASSUMPTION derived from the sample
+  # `satellite` values. Re-verify against FIRMS documentation in Phase 03.
+  platform_mapping:
+    Terra: "Terra"
+    Aqua: "Aqua"
+    N: "S-NPP"
+    "1": "NOAA-20"
+
+# Phase 01: unified schema / column mapping live in config, not in code.
+schema:
+  # Filled in Phase 01 after inspecting the real files.
+  column_mapping: null
+
+# Phase 03: confidence harmonization. Scale differs per sensor and must be
+# based on verified official documentation before any value is added here.
+confidence:
+  modis: null
+  viirs: null
+
+# Phase 04: temporal matching window, in hours. To be justified in Phase 04.
+temporal:
+  time_window_h: null
+  # UTC confirmed in Phase 03; until then this is a placeholder, not a fact.
+  timezone: "UTC"
+
+# Phase 05: spatial grid. To be justified in Phase 05.
+spatial:
+  grid_km: null
+  storage_crs: "EPSG:4326"
+  # Region boxes are derived from the data extent (not administrative units).
+  region_grid: 2
+
+# Phase 07: cross-sensor matching. To be justified with a sensitivity analysis.
+matching:
+  match_radius_m: null
+  time_window_h: null
+
+# Phase 03: non-destructive QC flags. No rows are ever deleted.
+quality:
+  flags:
+    - "invalid_ti4"
+    - "type_nonzero"
+    - "low_confidence"
+    - "night_detection"
